@@ -62,5 +62,6 @@ export async function leaveCall(
             source: 0,
         })
     );
+    calls.delete(chatId);
     return true;
 }
