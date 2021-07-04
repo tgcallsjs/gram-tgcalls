@@ -1,0 +1,29 @@
+{
+  "name": "gram-tgcalls",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "tsc --noEmit",
+    "prepare": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tgcallsjs/gram-tgcalls.git"
+  },
+  "author": "Roj Serbest <rojserbest@icloud.com>",
+  "license": "LGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/tgcallsjs/gram-tgcalls/issues"
+  },
+  "homepage": "https://github.com/tgcallsjs/gram-tgcalls#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^16.0.0",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "node-pre-gyp": "^0.17.0",
+    "telegram": "^1.7.7",
+    "tgcalls": "^0.1.3"
+  }
+}
