@@ -107,4 +107,8 @@ export class GramTGCalls {
 
         return null;
     }
+
+    connected(chatId: number): boolean {
+        return !!this.#connections.get(chatId);
+    }
 }
