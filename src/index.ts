@@ -95,7 +95,14 @@ export class GramTGCalls {
         const connection = this.#connections.get(chatId);
 
         if (connection) {
-            return await leaveCall(this.client, chatId);
+            const result = await leaveCall(this.client, chatId);
+
+            if (result) {
+                this.#connections.delete(chatId);
+                return true;
+            }
+
+            return result;
         }
 
         return null;
