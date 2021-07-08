@@ -6,7 +6,7 @@ const calls = new Map<number, Api.TypeInputGroupCall>();
 export function getJoinCall(
     client: TelegramClient,
     chatId: number,
-    joinAs: Api.TypeEntityLike = 'me'
+    joinAs?: Api.TypeEntityLike
 ): JoinVoiceCallCallback<any> {
     return async (params) => {
         const fullChat = (
@@ -20,6 +20,7 @@ export function getJoinCall(
         }
 
         calls.set(chatId, fullChat.call);
+
         const joinGroupCallResult = await client.invoke(
             new Api.phone.JoinGroupCall({
                 muted: false,
@@ -38,9 +39,10 @@ export function getJoinCall(
                         ssrc: params.source,
                     }),
                 }),
-                joinAs: joinAs,
+                joinAs: fullChat.groupcallDefaultJoinAs || joinAs || 'me',
             })
         );
+
         // @ts-ignore
         return JSON.parse(joinGroupCallResult.updates[0].call.params.data);
     };

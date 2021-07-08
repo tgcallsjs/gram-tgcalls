@@ -32,6 +32,7 @@ export class GramTGCalls {
                 tgcalls: new TGCalls(options?.params),
                 stream: new Stream(readable),
             };
+
             connection.tgcalls.joinVoiceCall = getJoinCall(
                 this.client,
                 chatId,
