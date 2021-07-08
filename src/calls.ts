@@ -39,7 +39,7 @@ export function getJoinCall(
                         ssrc: params.source,
                     }),
                 }),
-                joinAs: fullChat.groupcallDefaultJoinAs || joinAs || 'me',
+                joinAs: joinAs || fullChat.groupcallDefaultJoinAs || 'me',
             })
         );
 
