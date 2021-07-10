@@ -78,6 +78,21 @@ export class GramTGCalls {
         return null;
     }
 
+    skip(chatId: number): boolean | null {
+        const connection = this.#connections.get(chatId);
+
+        if (connection) {
+            if (!connection.stream.finished) {
+                connection.stream.finish();
+                return true;
+            }
+
+            return false;
+        }
+
+        return null;
+    }
+
     stop(chatId: number): boolean | null {
         const connection = this.#connections.get(chatId);
 
