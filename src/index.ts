@@ -113,4 +113,14 @@ export class GramTGCalls {
     connected(chatId: number): boolean {
         return !!this.#connections.get(chatId);
     }
+
+    finished(chatId: number): boolean | null {
+        const connection = this.#connections.get(chatId);
+
+        if (connection) {
+            return connection.stream.finished;
+        }
+
+        return null;
+    }
 }
