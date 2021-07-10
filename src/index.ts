@@ -83,7 +83,8 @@ export class GramTGCalls {
 
         if (connection) {
             if (!connection.stream.finished) {
-                connection.stream.finish();
+                connection.stream.stop();
+                connection.stream.emit('finish');
                 return true;
             }
 
