@@ -78,22 +78,7 @@ export class GramTGCalls {
         return null;
     }
 
-    stop(chatId: number): boolean | null {
-        const connection = this.#connections.get(chatId);
-
-        if (connection) {
-            if (!connection.stream.finished) {
-                connection.stream.stop();
-                return true;
-            }
-
-            return false;
-        }
-
-        return null;
-    }
-
-    async leave(chatId: number): Promise<boolean | null> {
+    async stop(chatId: number): Promise<boolean | null> {
         const connection = this.#connections.get(chatId);
 
         if (connection) {
