@@ -21,6 +21,12 @@ export class GramTGCalls {
             onFinish?: (...args: any[]) => void;
             joinAs?: Api.TypeEntityLike;
             params?: any;
+            stream?: {
+                bitsPerSample?: number;
+                sampleRate?: number;
+                channelCount?: number;
+                almostFinishedTrigger?: number;
+            };
         }
     ) {
         const connection = this.#connections.get(chatId);
@@ -30,7 +36,13 @@ export class GramTGCalls {
         } else {
             const connection = {
                 tgcalls: new TGCalls(options?.params),
-                stream: new Stream(readable),
+                stream: new Stream(
+                    readable,
+                    options?.stream?.bitsPerSample || 16,
+                    options?.stream?.sampleRate || 65000,
+                    options?.stream?.channelCount || 1,
+                    options?.stream?.almostFinishedTrigger || 20
+                ),
             };
 
             connection.tgcalls.joinVoiceCall = getJoinCall(
