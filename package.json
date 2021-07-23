@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "node-pre-gyp": "^0.17.0",
-    "telegram": "^1.7.7",
+    "telegram": "^1.7.23",
     "tgcalls": "^0.1.4"
   }
 }

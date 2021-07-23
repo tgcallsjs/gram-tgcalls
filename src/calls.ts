@@ -44,7 +44,15 @@ export function getJoinCall(
         );
 
         // @ts-ignore
-        return JSON.parse(joinGroupCallResult.updates[0].call.params.data);
+        for (let i in joinGroupCallResult.updates) {
+            // @ts-ignore
+            const update = joinGroupCallResult.updates[i];
+            if (update instanceof Api.UpdateGroupCallConnection) {
+                return JSON.parse(update.params.data);
+            }
+        }
+
+        throw new Error('Could not get connection params');
     };
 }
 
