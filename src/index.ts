@@ -56,7 +56,13 @@ export class GramTGCalls {
             }
 
             this.#connections.set(chatId, connection);
-            await connection.tgcalls.start(connection.stream.createTrack());
+
+            try {
+                await connection.tgcalls.start(connection.stream.createTrack());
+            } catch (error) {
+                this.#connections.delete(chatId);
+                throw error;
+            }
         }
     }
 
