@@ -1,4 +1,4 @@
-# GramTGCalls
+# GramTGCalls [![Mentioned in Awesome Telegram Calls](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/tgcalls/awesome-tgcalls)
 Connecting tgcallsjs with [GramJS](https://github.com/gram-js/gramjs).
 
 ## Install
