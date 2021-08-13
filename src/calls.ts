@@ -1,7 +1,7 @@
 import { TelegramClient, Api } from 'telegram';
 import { JoinVoiceCallCallback } from 'tgcalls/lib/types';
 
-const calls = new Map<number, Api.TypeInputGroupCall>();
+export const calls = new Map<number, Api.TypeInputGroupCall>();
 
 export function getJoinCall(
     client: TelegramClient,
@@ -47,6 +47,7 @@ export function getJoinCall(
         for (let i in joinGroupCallResult.updates) {
             // @ts-ignore
             const update = joinGroupCallResult.updates[i];
+
             if (update instanceof Api.UpdateGroupCallConnection) {
                 return JSON.parse(update.params.data);
             }
@@ -56,10 +57,7 @@ export function getJoinCall(
     };
 }
 
-export async function leaveCall(
-    client: TelegramClient,
-    chatId: number
-): Promise<boolean> {
+export async function leaveCall(client: TelegramClient, chatId: number) {
     const call = calls.get(chatId);
 
     if (!call) {
@@ -72,6 +70,7 @@ export async function leaveCall(
             source: 0,
         })
     );
+
     calls.delete(chatId);
     return true;
 }

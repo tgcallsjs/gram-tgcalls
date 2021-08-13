@@ -1,8 +1,10 @@
 import { Readable } from 'stream';
 import { Api, TelegramClient } from 'telegram';
+import { EntityLike } from 'telegram/define';
 import { Stream, TGCalls } from 'tgcalls';
 
 import { getJoinCall, leaveCall } from './calls';
+import { setVolume } from './participants';
 import { Connection } from './types';
 
 export class GramTGCalls {
@@ -66,7 +68,7 @@ export class GramTGCalls {
         }
     }
 
-    pause(chatId: number): boolean | null {
+    pause(chatId: number) {
         const connection = this.#connections.get(chatId);
 
         if (connection) {
@@ -81,7 +83,7 @@ export class GramTGCalls {
         return null;
     }
 
-    resume(chatId: number): boolean | null {
+    resume(chatId: number) {
         const connection = this.#connections.get(chatId);
 
         if (connection) {
@@ -96,7 +98,7 @@ export class GramTGCalls {
         return null;
     }
 
-    async stop(chatId: number): Promise<boolean | null> {
+    async stop(chatId: number) {
         const connection = this.#connections.get(chatId);
 
         if (connection) {
@@ -113,11 +115,11 @@ export class GramTGCalls {
         return null;
     }
 
-    connected(chatId: number): boolean {
+    connected(chatId: number) {
         return !!this.#connections.get(chatId);
     }
 
-    finished(chatId: number): boolean | null {
+    finished(chatId: number) {
         const connection = this.#connections.get(chatId);
 
         if (connection) {
@@ -125,5 +127,9 @@ export class GramTGCalls {
         }
 
         return null;
+    }
+
+    setVolume(chatId: number, volume: number, participant: EntityLike = 'me') {
+        return setVolume(this.client, chatId, participant, volume);
     }
 }
