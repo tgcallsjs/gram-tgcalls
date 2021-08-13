@@ -5,7 +5,7 @@
     "scripts": {
         "test": "tsc --noEmit",
         "prepare": "tsc",
-        "docs": "typedoc src/index.ts"
+        "docs": "typedoc src/index.ts --readme none"
     },
     "repository": {
         "type": "git",

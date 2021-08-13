@@ -16,6 +16,14 @@ export class GramTGCalls {
         this.#connections = new Map();
     }
 
+    /**
+     * Streams the specified audio with the provided options.
+     *
+     * Audio properties:
+     *   - Format: s16le
+     *   - Bitrate: 65K or what you provide in options.stream.sampleRate
+     *   - Channels: 2
+     */
     async stream(
         chatId: number,
         readable: Readable,
@@ -68,6 +76,9 @@ export class GramTGCalls {
         }
     }
 
+    /**
+     * Pauses the stream. Returns true if successful, false if already paused or null if not in the call of the specified chat.
+     */
     pause(chatId: number) {
         const connection = this.#connections.get(chatId);
 
@@ -83,6 +94,9 @@ export class GramTGCalls {
         return null;
     }
 
+    /**
+     * Resumes the stream. Returns true if successful, false if already resumed or null if not in the call of the specified chat.
+     */
     resume(chatId: number) {
         const connection = this.#connections.get(chatId);
 
@@ -98,6 +112,9 @@ export class GramTGCalls {
         return null;
     }
 
+    /**
+     * Stops the stream and leaves the call. Returns true if successful or a falsy value if not.
+     */
     async stop(chatId: number) {
         const connection = this.#connections.get(chatId);
 
@@ -115,10 +132,16 @@ export class GramTGCalls {
         return null;
     }
 
+    /**
+     * Returns true if in the call of the specified chat or false if not.
+     */
     connected(chatId: number) {
         return !!this.#connections.get(chatId);
     }
 
+    /**
+     * Returns true if the stream is finished in the specified chat or false if not.
+     */
     finished(chatId: number) {
         const connection = this.#connections.get(chatId);
 
@@ -129,6 +152,9 @@ export class GramTGCalls {
         return null;
     }
 
+    /**
+     * Sets the volume of self or someone. Returns true if successful or false if not in the call of the specified chat.
+     */
     setVolume(chatId: number, volume: number, participant: EntityLike = 'me') {
         return setVolume(this.client, chatId, participant, volume);
     }
