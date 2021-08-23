@@ -24,8 +24,7 @@
         "typescript": "^4.3.5"
     },
     "dependencies": {
-        "node-pre-gyp": "^0.17.0",
-        "telegram": "^1.7.23",
+        "telegram": "^1.8.9",
         "tgcalls": "^0.1.4"
     }
 }
