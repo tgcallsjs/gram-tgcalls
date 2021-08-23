@@ -1,76 +1,61 @@
 import { TelegramClient, Api } from 'telegram';
-import { JoinVoiceCallCallback } from 'tgcalls/lib/types';
+import { JoinVoiceCallParams, JoinVoiceCallResponse } from 'tgcalls/lib/types';
+import { JoinParams, EditParams } from './types';
 
-export const calls = new Map<number, Api.TypeInputGroupCall>();
-
-export function getJoinCall(
+export async function join(
     client: TelegramClient,
-    chatId: number,
-    joinAs?: Api.TypeEntityLike
-): JoinVoiceCallCallback<any> {
-    return async (params) => {
-        const fullChat = (
-            await client.invoke(
-                new Api.channels.GetFullChannel({ channel: chatId })
-            )
-        ).fullChat;
-
-        if (!fullChat.call) {
-            throw new Error('No active group call');
-        }
-
-        calls.set(chatId, fullChat.call);
-
-        const joinGroupCallResult = await client.invoke(
-            new Api.phone.JoinGroupCall({
-                muted: false,
-                call: fullChat.call,
-                params: new Api.DataJSON({
-                    data: JSON.stringify({
-                        ufrag: params.ufrag,
-                        pwd: params.pwd,
-                        fingerprints: [
-                            {
-                                hash: params.hash,
-                                setup: params.setup,
-                                fingerprint: params.fingerprint,
-                            },
-                        ],
-                        ssrc: params.source,
-                    }),
+    call: Api.InputGroupCall,
+    payload: JoinVoiceCallParams<any>,
+    params: JoinParams,
+): Promise<JoinVoiceCallResponse> {
+    // @ts-ignore
+    const { updates } = await client.invoke(
+        new Api.phone.JoinGroupCall({
+            call,
+            params: new Api.DataJSON({
+                data: JSON.stringify({
+                    ufrag: payload.ufrag,
+                    pwd: payload.pwd,
+                    fingerprints: [
+                        {
+                            hash: payload.hash,
+                            setup: payload.setup,
+                            fingerprint: payload.fingerprint,
+                        },
+                    ],
+                    ssrc: payload.source,
                 }),
-                joinAs: joinAs || fullChat.groupcallDefaultJoinAs || 'me',
-            })
-        );
-
-        // @ts-ignore
-        for (let i in joinGroupCallResult.updates) {
-            // @ts-ignore
-            const update = joinGroupCallResult.updates[i];
-
-            if (update instanceof Api.UpdateGroupCallConnection) {
-                return JSON.parse(update.params.data);
-            }
-        }
-
-        throw new Error('Could not get connection params');
-    };
-}
-
-export async function leaveCall(client: TelegramClient, chatId: number) {
-    const call = calls.get(chatId);
-
-    if (!call) {
-        return false;
-    }
-
-    await client.invoke(
-        new Api.phone.LeaveGroupCall({
-            call: call,
-            source: 0,
-        })
+            }),
+            ...params,
+        }),
     );
 
-    calls.delete(chatId);
-    return true;
+    for (let i in updates) {
+        const update = updates[i];
+
+        if (update instanceof Api.UpdateGroupCallConnection) {
+            return JSON.parse(update.params.data);
+        }
+    }
+
+    throw new Error('Could not get transport');
+}
+
+export function leave(client: TelegramClient, call: Api.TypeInputGroupCall) {
+    return client.invoke(new Api.phone.LeaveGroupCall({ call }));
+}
+
+export function edit(
+    client: TelegramClient,
+    call: Api.InputGroupCall,
+    participant: Api.TypeEntityLike,
+    params: EditParams,
+) {
+    return client.invoke(
+        new Api.phone.EditGroupCallParticipant({
+            call,
+            participant,
+            ...params,
+        }),
+    );
 }
