@@ -1,7 +1,6 @@
 import { Readable } from 'stream';
 import { Api, TelegramClient } from 'telegram';
 import { TGCalls, Stream } from 'tgcalls';
-import { JoinVoiceCallParams } from 'tgcalls/lib/types';
 import * as calls from './calls';
 import * as chats from './chats';
 import { JoinParams, MediaParams, EditParams } from './types';
@@ -10,6 +9,7 @@ export default class GramTGCalls {
     private call?: Api.InputGroupCall;
     private tgcalls?: TGCalls<any>;
     public media?: Stream;
+    public track?: MediaStreamTrack;
 
     constructor(
         public client: TelegramClient,
@@ -62,7 +62,8 @@ export default class GramTGCalls {
             return;
         }
 
-        this.tgcalls.start(this.media.createTrack());
+        this.track = this.media.createTrack();
+        this.tgcalls.start(this.track);
     }
 
     pause() {
@@ -91,6 +92,32 @@ export default class GramTGCalls {
         return false;
     }
 
+    mute() {
+        if (!this.track) {
+            return null;
+        }
+
+        if (this.track.enabled) {
+            this.track.enabled = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    unmute() {
+        if (!this.track) {
+            return null;
+        }
+
+        if (!this.track.enabled) {
+            this.track.enabled = true;
+            return true;
+        }
+
+        return false;
+    }
+
     async stop() {
         if (!this.call) {
             return false;
@@ -101,7 +128,7 @@ export default class GramTGCalls {
 
         await calls.leave(this.client, this.call);
 
-        this.tgcalls = this.media = this.call = undefined;
+        this.call = this.tgcalls = this.media = this.track = undefined;
         return true;
     }
 
