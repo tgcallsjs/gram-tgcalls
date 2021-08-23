@@ -119,7 +119,7 @@ export default class GramTGCalls {
         }
 
         await calls.edit(this.client, this.call, participant, params);
-        return;
+        return true;
     }
 
     editSelf(params: EditParams) {
