@@ -99,11 +99,9 @@ export default class GramTGCalls {
         this.media?.stop();
         this.tgcalls?.close();
 
-        const { call } = this;
+        await calls.leave(this.client, this.call);
 
         this.tgcalls = this.media = this.call = undefined;
-
-        await calls.leave(this.client, call);
         return true;
     }
 
