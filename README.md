@@ -11,3 +11,7 @@ npm i gram-tgcalls
 ## Docs
 
 The docs can be found [here](https://tgcallsjs.github.io/gram-tgcalls).
+
+## Credits
+
+-   [Telethon bridge](https://github.com/MarshalX/tgcalls/blob/dev/pytgcalls/pytgcalls/mtproto/telethon_bridge.py) by [@MarshalX](https://github.com)

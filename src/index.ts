@@ -1,155 +1,125 @@
 import { Readable } from 'stream';
 import { Api, TelegramClient } from 'telegram';
-import { EntityLike } from 'telegram/define';
-import { Stream, TGCalls } from 'tgcalls';
+import { TGCalls, Stream } from 'tgcalls';
+import { JoinVoiceCallParams } from 'tgcalls/lib/types';
+import * as calls from './calls';
+import * as chats from './chats';
+import { JoinParams, MediaParams, EditParams } from './types';
 
-import { getJoinCall, leaveCall } from './calls';
-import { setVolume } from './participants';
-import { Connection } from './types';
+export default class GramTGCalls {
+    private call?: Api.InputGroupCall;
+    private tgcalls?: TGCalls<any>;
+    public media?: Stream;
 
-export class GramTGCalls {
-    client: TelegramClient;
-    #connections: Map<number, Connection>;
+    constructor(
+        public client: TelegramClient,
+        public chat: Api.TypeEntityLike,
+    ) {}
 
-    constructor(client: TelegramClient) {
-        this.client = client;
-        this.#connections = new Map();
-    }
-
-    /**
-     * Streams the specified audio with the provided options.
-     *
-     * Audio properties:
-     *   - Format: s16le
-     *   - Bitrate: 65K or what you provide in options.stream.sampleRate
-     *   - Channels: 2
-     */
-    async stream(
-        chatId: number,
+    stream(
         readable: Readable,
-        options?: {
-            onFinish?: (...args: any[]) => void;
-            joinAs?: Api.TypeEntityLike;
-            params?: any;
-            stream?: {
-                bitsPerSample?: number;
-                sampleRate?: number;
-                channelCount?: number;
-                almostFinishedTrigger?: number;
+        params?: {
+            join?: JoinParams;
+            media?: MediaParams;
+        },
+    ) {
+        if (!this.tgcalls) {
+            this.tgcalls = new TGCalls({});
+            this.tgcalls.joinVoiceCall = async payload => {
+                const fullChat = await chats.getFull(this.client, this.chat);
+
+                if (!fullChat.call) {
+                    throw new Error('No active call');
+                }
+
+                this.call = fullChat.call;
+
+                return await calls.join(this.client, this.call, payload, {
+                    ...params?.join,
+                    muted: params?.join?.muted || false,
+                    joinAs:
+                        params?.join?.joinAs ||
+                        fullChat.groupcallDefaultJoinAs ||
+                        'me',
+                });
             };
         }
-    ) {
-        const connection = this.#connections.get(chatId);
 
-        if (connection) {
-            connection.stream.setReadable(readable);
-        } else {
-            const connection = {
-                tgcalls: new TGCalls(options?.params),
-                stream: new Stream(
-                    readable,
-                    options?.stream?.bitsPerSample || 16,
-                    options?.stream?.sampleRate || 65000,
-                    options?.stream?.channelCount || 1,
-                    options?.stream?.almostFinishedTrigger || 20
-                ),
-            };
-
-            connection.tgcalls.joinVoiceCall = getJoinCall(
-                this.client,
-                chatId,
-                options?.joinAs
+        if (!this.media) {
+            this.media = new Stream(
+                readable,
+                params?.media?.bitsPerSample,
+                params?.media?.sampleRate,
+                params?.media?.channelCount,
+                params?.media?.almostFinishedTrigger,
             );
 
-            if (options?.onFinish) {
-                connection.stream.addListener('finish', options.onFinish);
+            if (params?.media?.onFinish) {
+                this.media.addListener('finish', params.media.onFinish);
             }
-
-            this.#connections.set(chatId, connection);
-
-            try {
-                await connection.tgcalls.start(connection.stream.createTrack());
-            } catch (error) {
-                this.#connections.delete(chatId);
-                throw error;
-            }
+        } else {
+            this.media.setReadable(readable);
+            return;
         }
+
+        this.tgcalls.start(this.media.createTrack());
     }
 
-    /**
-     * Pauses the stream. Returns true if successful, false if already paused or null if not in the call of the specified chat.
-     */
-    pause(chatId: number) {
-        const connection = this.#connections.get(chatId);
+    pause() {
+        if (!this.media) {
+            return null;
+        }
 
-        if (connection) {
-            if (!connection.stream.paused) {
-                connection.stream.pause();
-                return true;
-            }
+        if (!this.media.paused) {
+            this.media.pause();
+            return true;
+        }
 
+        return false;
+    }
+
+    resume() {
+        if (!this.media) {
+            return null;
+        }
+
+        if (this.media.paused) {
+            this.media.pause();
+            return true;
+        }
+
+        return false;
+    }
+
+    async stop() {
+        if (!this.call) {
             return false;
         }
 
-        return null;
+        this.media?.stop();
+        this.tgcalls?.close();
+
+        const { call } = this;
+
+        this.tgcalls = this.media = this.call = undefined;
+
+        await calls.leave(this.client, call);
+        return true;
     }
 
-    /**
-     * Resumes the stream. Returns true if successful, false if already resumed or null if not in the call of the specified chat.
-     */
-    resume(chatId: number) {
-        const connection = this.#connections.get(chatId);
-
-        if (connection) {
-            if (connection.stream.paused) {
-                connection.stream.pause();
-                return true;
-            }
-
-            return false;
+    finished() {
+        if (!this.media) {
+            return null;
         }
 
-        return null;
+        return this.media.finished;
     }
 
-    /**
-     * Stops the stream and leaves the call. Returns true if successful or a falsy value if not.
-     */
-    async stop(chatId: number) {
-        const connection = this.#connections.get(chatId);
-
-        if (connection) {
-            this.#connections.delete(chatId);
-            return leaveCall(this.client, chatId);
-        }
-
-        return null;
+    edit(participant: Api.TypeEntityLike, params: EditParams) {
+        return calls.edit(this.client, participant, params);
     }
 
-    /**
-     * Returns true if in the call of the specified chat or false if not.
-     */
-    connected(chatId: number) {
-        return !!this.#connections.get(chatId);
-    }
-
-    /**
-     * Returns true if the stream is finished in the specified chat or false if not.
-     */
-    finished(chatId: number) {
-        const connection = this.#connections.get(chatId);
-
-        if (connection) {
-            return connection.stream.finished;
-        }
-
-        return null;
-    }
-
-    /**
-     * Sets the volume of self or someone. Returns true if successful or false if not in the call of the specified chat.
-     */
-    setVolume(chatId: number, volume: number, participant: EntityLike = 'me') {
-        return setVolume(this.client, chatId, participant, volume);
+    editSelf(params: EditParams) {
+        return this.edit('me', params);
     }
 }
