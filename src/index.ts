@@ -16,6 +16,9 @@ export default class GramTGCalls {
         public chat: Api.TypeEntityLike,
     ) {}
 
+    /**
+     * Starts streaming the provided readable.
+     */
     stream(
         readable: Readable,
         params?: {
@@ -66,6 +69,9 @@ export default class GramTGCalls {
         this.tgcalls.start(this.track);
     }
 
+    /**
+     * Pauses streaming. Returns `null` if not in call, `false` if already paused or `true` if successful.
+     */
     pause() {
         if (!this.media) {
             return null;
@@ -79,6 +85,9 @@ export default class GramTGCalls {
         return false;
     }
 
+    /**
+     * Resumes streaming. Returns `null` if not in call, `false` if not paused or `true` if successful.
+     */
     resume() {
         if (!this.media) {
             return null;
@@ -92,6 +101,9 @@ export default class GramTGCalls {
         return false;
     }
 
+    /**
+     * Mutes the sound. Returns `null` if not in call, `false` if already muted or `true` if successful.
+     */
     mute() {
         if (!this.track) {
             return null;
@@ -105,6 +117,9 @@ export default class GramTGCalls {
         return false;
     }
 
+    /**
+     * Unmutes the sound. Returns `null` if not in call, `false` if already muted or `true` if successful.
+     */
     unmute() {
         if (!this.track) {
             return null;
@@ -118,6 +133,9 @@ export default class GramTGCalls {
         return false;
     }
 
+    /**
+     * Stops the stream, closes the WebRTC connection and sends leave request to Telegram. Returns `false` if not in call or `true` if successful.
+     */
     async stop() {
         if (!this.call) {
             return false;
@@ -132,6 +150,9 @@ export default class GramTGCalls {
         return true;
     }
 
+    /**
+     * Tells if the provided readable has finished streaming. Returns `null` if not in call, `true` if finished or `false` if not.
+     */
     finished() {
         if (!this.media) {
             return null;
@@ -140,6 +161,9 @@ export default class GramTGCalls {
         return this.media.finished;
     }
 
+    /**
+     * Edits the provided participant.
+     */
     async edit(participant: Api.TypeEntityLike, params: EditParams) {
         if (!this.call) {
             return false;
@@ -149,7 +173,20 @@ export default class GramTGCalls {
         return true;
     }
 
+    /**
+     * Alias for `edit`.
+     */
+    editParticipant = this.edit;
+
+    /**
+     * Edits self participant.
+     */
     editSelf(params: EditParams) {
         return this.edit('me', params);
     }
+
+    /**
+     * Alias for `editSelf`.
+     */
+    editSelfParticipant = this.editSelf;
 }
