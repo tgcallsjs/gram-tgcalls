@@ -47,11 +47,13 @@ export function leave(client: TelegramClient, call: Api.TypeInputGroupCall) {
 
 export function edit(
     client: TelegramClient,
+    call: Api.InputGroupCall,
     participant: Api.TypeEntityLike,
     params: EditParams,
 ) {
     return client.invoke(
         new Api.phone.EditGroupCallParticipant({
+            call,
             participant,
             ...params,
         }),

@@ -113,8 +113,13 @@ export default class GramTGCalls {
         return this.media.finished;
     }
 
-    edit(participant: Api.TypeEntityLike, params: EditParams) {
-        return calls.edit(this.client, participant, params);
+    async edit(participant: Api.TypeEntityLike, params: EditParams) {
+        if (!this.call) {
+            return false;
+        }
+
+        await calls.edit(this.client, this.call, participant, params);
+        return;
     }
 
     editSelf(params: EditParams) {
