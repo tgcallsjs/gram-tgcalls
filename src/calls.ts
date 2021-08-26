@@ -30,9 +30,7 @@ export async function join(
         }),
     );
 
-    for (let i in updates) {
-        const update = updates[i];
-
+    for (const update of updates) {
         if (update instanceof Api.UpdateGroupCallConnection) {
             return JSON.parse(update.params.data);
         }
