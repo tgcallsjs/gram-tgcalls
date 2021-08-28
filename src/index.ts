@@ -66,7 +66,7 @@ export default class GramTGCalls {
         }
 
         this.track = this.media.createTrack();
-        this.tgcalls.start(this.track);
+        return this.tgcalls.start(this.track);
     }
 
     /**
