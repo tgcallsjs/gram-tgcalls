@@ -83,7 +83,7 @@ export class GramTGCalls {
         }
 
         try {
-            this.tgcalls.start(this.audioTrack, this.videoTrack);
+            await this.tgcalls.start(this.audioTrack, this.videoTrack);
         } catch (err) {
             this.call =
                 this.tgcalls =
