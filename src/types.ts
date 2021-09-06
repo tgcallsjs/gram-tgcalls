@@ -1,6 +1,5 @@
 import { Readable } from 'stream';
 import { Api } from 'telegram';
-import { Stream } from 'tgcalls';
 
 export interface JoinParams {
     joinAs?: Api.TypeEntityLike;
