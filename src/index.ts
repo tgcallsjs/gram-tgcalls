@@ -15,7 +15,9 @@ export class GramTGCalls {
     constructor(
         public client: TelegramClient,
         public chat: Api.TypeEntityLike,
-    ) {}
+    ) {
+        this.client.addEventHandler(this.updateHandler);
+    }
 
     private updateHandler(update: Api.TypeUpdate) {
         if (update instanceof Api.UpdateGroupCall) {
@@ -57,7 +59,9 @@ export class GramTGCalls {
         }
 
         if (!this.audioStream && !this.videoStream) {
-            this.audioStream = new Stream(audio.readable, { ...audio.options });
+            this.audioStream = new Stream(audio.readable, {
+                ...audio.options,
+            });
             this.audioTrack = this.audioStream.createTrack();
 
             if (audio.options?.onFinish) {
@@ -85,11 +89,7 @@ export class GramTGCalls {
         try {
             await this.tgcalls.start(this.audioTrack, this.videoTrack);
         } catch (err) {
-            this.call =
-                this.tgcalls =
-                this.audioTrack =
-                this.videoTrack =
-                    undefined;
+            this.reset();
             throw err;
         }
     }
@@ -143,6 +143,22 @@ export class GramTGCalls {
     }
 
     /**
+     * Resumes the video stream. Returns `null` if there is not in call, `false` if not paused or `true` if successful.
+     */
+    resumeVideo() {
+        if (!this.videoStream) {
+            return null;
+        }
+
+        if (this.videoStream.paused) {
+            this.videoStream.pause();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Mutes the audio stream. Returns `null` if there is not in call, `false` if already muted or `true` if successful.
      */
     muteAudio() {
@@ -159,6 +175,22 @@ export class GramTGCalls {
     }
 
     /**
+     * Mutes the video stream. Returns `null` if there is not in call, `false` if already muted or `true` if successful.
+     */
+    muteVideo() {
+        if (!this.videoTrack) {
+            return null;
+        }
+
+        if (this.videoTrack.enabled) {
+            this.videoTrack.enabled = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Unmutes the audio stream. Returns `null` if not in call, `false` if already muted or `true` if successful.
      */
     unmuteAudio() {
@@ -168,6 +200,22 @@ export class GramTGCalls {
 
         if (!this.audioTrack.enabled) {
             this.audioTrack.enabled = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Unmutes the audio stream. Returns `null` if not in call, `false` if already muted or `true` if successful.
+     */
+    unmuteVideo() {
+        if (!this.videoTrack) {
+            return null;
+        }
+
+        if (!this.videoTrack.enabled) {
+            this.videoTrack.enabled = true;
             return true;
         }
 
