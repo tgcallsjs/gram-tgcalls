@@ -5,7 +5,7 @@
     "scripts": {
         "test": "tsc --noEmit",
         "prepare": "tsc",
-        "docs": "typedoc src/* --readme none"
+        "docs": "typedoc src/*"
     },
     "repository": {
         "type": "git",
@@ -25,6 +25,6 @@
     },
     "dependencies": {
         "telegram": "^1.8.9",
-        "tgcalls": "^0.1.4"
+        "tgcalls": "github:tgcallsjs/tgcalls"
     }
 }

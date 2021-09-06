@@ -9,5 +9,12 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "declaration": true
+    },
+    "typedocOptions": {
+        "excludePrivate": true,
+        "includeVersion": true,
+        "name": "tgcallsjs",
+        "out": "docs/",
+        "readme": "none"
     }
 }

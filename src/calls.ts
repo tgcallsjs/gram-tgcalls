@@ -6,7 +6,7 @@ export async function join(
     client: TelegramClient,
     call: Api.InputGroupCall,
     payload: JoinVoiceCallParams<any>,
-    params: JoinParams,
+    params?: JoinParams,
 ): Promise<JoinVoiceCallResponse> {
     // @ts-ignore
     const { updates } = await client.invoke(
@@ -24,9 +24,18 @@ export async function join(
                         },
                     ],
                     ssrc: payload.source,
+                    'ssrc-groups': [
+                        {
+                            semantics: 'FID',
+                            sources: payload.sourceGroup,
+                        },
+                    ],
                 }),
             }),
-            ...params,
+            joinAs: params?.joinAs || 'me',
+            muted: params?.muted || false,
+            videoStopped: params?.videoStopped || false,
+            inviteHash: params?.inviteHash,
         }),
     );
 

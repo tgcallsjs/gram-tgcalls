@@ -1,26 +1,37 @@
-import { Readable } from 'stream';
 import { Api, TelegramClient } from 'telegram';
 import { TGCalls, Stream } from 'tgcalls';
 import * as calls from './calls';
 import * as chats from './chats';
-import { JoinParams, MediaParams, EditParams } from './types';
+import { JoinParams, MediaParams, EditParams, Audio, Video } from './types';
 
-export default class GramTGCalls {
+export class GramTGCalls {
     private call?: Api.InputGroupCall;
     private tgcalls?: TGCalls<any>;
-    public media?: Stream;
-    public track?: MediaStreamTrack;
+    private audioStream?: Stream;
+    private videoStream?: Stream;
+    private audioTrack?: MediaStreamTrack;
+    private videoTrack?: MediaStreamTrack;
 
     constructor(
         public client: TelegramClient,
         public chat: Api.TypeEntityLike,
     ) {}
 
+    private updateHandler(update: Api.TypeUpdate) {
+        if (update instanceof Api.UpdateGroupCall) {
+            if (update.call instanceof Api.GroupCallDiscarded) {
+                this.close();
+                this.reset();
+            }
+        }
+    }
+
     /**
-     * Starts streaming the provided readable.
+     * Starts streaming the provided medias with their own options.
      */
-    stream(
-        readable: Readable,
+    async stream(
+        audio: Audio,
+        video?: Video,
         params?: {
             join?: JoinParams;
             media?: MediaParams;
@@ -39,46 +50,60 @@ export default class GramTGCalls {
 
                 return await calls.join(this.client, this.call, payload, {
                     ...params?.join,
-                    muted: params?.join?.muted || false,
                     joinAs:
-                        params?.join?.joinAs ||
-                        fullChat.groupcallDefaultJoinAs ||
-                        'me',
+                        params?.join?.joinAs || fullChat.groupcallDefaultJoinAs,
                 });
             };
         }
 
-        if (!this.media) {
-            this.media = new Stream(
-                readable,
-                params?.media?.bitsPerSample,
-                params?.media?.sampleRate,
-                params?.media?.channelCount,
-                params?.media?.almostFinishedTrigger,
-            );
+        if (!this.audioStream && !this.videoStream) {
+            this.audioStream = new Stream(audio.readable, { ...audio.options });
+            this.audioTrack = this.audioStream.createTrack();
 
-            if (params?.media?.onFinish) {
-                this.media.addListener('finish', params.media.onFinish);
+            if (audio.options?.onFinish) {
+                this.audioStream.addListener('finish', audio.options.onFinish);
+            }
+
+            this.videoStream = new Stream(video?.readable, {
+                video: true,
+                ...video?.options,
+            });
+            this.videoTrack = this.videoStream.createTrack();
+
+            if (video?.options?.onFinish) {
+                this.videoStream.addListener('finish', video.options.onFinish);
             }
         } else {
-            this.media.setReadable(readable);
+            this.audioStream?.setReadable(audio.readable);
+
+            if (video?.readable) {
+                this.videoStream?.setReadable(video.readable);
+            }
             return;
         }
 
-        this.track = this.media.createTrack();
-        return this.tgcalls.start(this.track);
+        try {
+            this.tgcalls.start(this.audioTrack, this.videoTrack);
+        } catch (err) {
+            this.call =
+                this.tgcalls =
+                this.audioTrack =
+                this.videoTrack =
+                    undefined;
+            throw err;
+        }
     }
 
     /**
-     * Pauses streaming. Returns `null` if not in call, `false` if already paused or `true` if successful.
+     * Pauses the audio stream. Returns `null` if there is not in call, `false` if already paused or `true` if successful.
      */
-    pause() {
-        if (!this.media) {
+    pauseAudio() {
+        if (!this.audioStream) {
             return null;
         }
 
-        if (!this.media.paused) {
-            this.media.pause();
+        if (!this.audioStream.paused) {
+            this.audioStream.pause();
             return true;
         }
 
@@ -86,15 +111,15 @@ export default class GramTGCalls {
     }
 
     /**
-     * Resumes streaming. Returns `null` if not in call, `false` if not paused or `true` if successful.
+     * Pauses the video stream. Returns `null` if there is not in call, `false` if already paused or `true` if successful.
      */
-    resume() {
-        if (!this.media) {
+    pauseVideo() {
+        if (!this.videoStream) {
             return null;
         }
 
-        if (this.media.paused) {
-            this.media.pause();
+        if (!this.videoStream.paused) {
+            this.videoStream.pause();
             return true;
         }
 
@@ -102,15 +127,15 @@ export default class GramTGCalls {
     }
 
     /**
-     * Mutes the sound. Returns `null` if not in call, `false` if already muted or `true` if successful.
+     * Resumes the audio stream. Returns `null` if there is not in call, `false` if not paused or `true` if successful.
      */
-    mute() {
-        if (!this.track) {
+    resumeAudio() {
+        if (!this.audioStream) {
             return null;
         }
 
-        if (this.track.enabled) {
-            this.track.enabled = false;
+        if (this.audioStream.paused) {
+            this.audioStream.pause();
             return true;
         }
 
@@ -118,15 +143,15 @@ export default class GramTGCalls {
     }
 
     /**
-     * Unmutes the sound. Returns `null` if not in call, `false` if already muted or `true` if successful.
+     * Mutes the audio stream. Returns `null` if there is not in call, `false` if already muted or `true` if successful.
      */
-    unmute() {
-        if (!this.track) {
+    muteAudio() {
+        if (!this.audioTrack) {
             return null;
         }
 
-        if (!this.track.enabled) {
-            this.track.enabled = true;
+        if (this.audioTrack.enabled) {
+            this.audioTrack.enabled = false;
             return true;
         }
 
@@ -134,31 +159,71 @@ export default class GramTGCalls {
     }
 
     /**
-     * Stops the stream, closes the WebRTC connection and sends leave request to Telegram. Returns `false` if not in call or `true` if successful.
+     * Unmutes the audio stream. Returns `null` if not in call, `false` if already muted or `true` if successful.
+     */
+    unmuteAudio() {
+        if (!this.audioTrack) {
+            return null;
+        }
+
+        if (!this.audioTrack.enabled) {
+            this.audioTrack.enabled = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    private close() {
+        this.audioStream?.stop();
+        this.videoStream?.stop();
+        this.tgcalls?.close();
+    }
+
+    private reset() {
+        this.call =
+            this.tgcalls =
+            this.audioStream =
+            this.videoStream =
+            this.audioTrack =
+            this.videoTrack =
+                undefined;
+    }
+
+    /**
+     * Stops the stream, closes the WebRTC connection, sends leave request to Telegram and frees up resources. Returns `false` if not in call or `true` if successful.
      */
     async stop() {
         if (!this.call) {
             return false;
         }
 
-        this.media?.stop();
-        this.tgcalls?.close();
-
+        this.close();
         await calls.leave(this.client, this.call);
-
-        this.call = this.tgcalls = this.media = this.track = undefined;
+        this.reset();
         return true;
     }
 
     /**
-     * Tells if the provided readable has finished streaming. Returns `null` if not in call, `true` if finished or `false` if not.
+     * Tells if the audio has finished streaming. Returns `null` if not in call, `true` if finished or `false` if not.
      */
-    finished() {
-        if (!this.media) {
+    audioFinished() {
+        if (!this.audioStream) {
             return null;
         }
 
-        return this.media.finished;
+        return this.audioStream.finished;
+    }
+
+    /**
+     * Tells if the video has finished streaming. Returns `null` if not in call, `true` if finished or `false` if not.
+     */
+    videoFinished() {
+        if (!this.videoStream) {
+            return null;
+        }
+
+        return this.videoStream.finished;
     }
 
     /**
