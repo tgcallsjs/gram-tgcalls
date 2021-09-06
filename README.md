@@ -4,6 +4,7 @@ An operative library for Telegram calls and a tgcallsjs helper.
 
 ## Features
 
+-   Video support.
 -   Super light & easy-to-use.
 -   Smart stream function.
 -   Native controls: pause, resume, mute, unmute.
@@ -21,4 +22,5 @@ The docs can be found [here](https://tgcallsjs.github.io/gram-tgcalls).
 
 ## Credits
 
--   [Telethon bridge](https://github.com/MarshalX/tgcalls/blob/dev/pytgcalls/pytgcalls/mtproto/telethon_bridge.py) by [@MarshalX](https://github.com)
+-   Structure inspired from Telethon bridge in [MarshalX/tgcalls](https://github.com/MarshalX/tgcalls).
+-   Video support by [@Laky-64](https://github.com/Laky-64).
