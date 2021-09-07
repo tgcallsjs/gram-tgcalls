@@ -20,7 +20,7 @@ export interface EditParams {
 }
 
 export interface Video {
-    readable: Readable;
+    readable?: Readable;
     options?: {
         onFinish?: () => void;
         width?: number;
@@ -30,7 +30,7 @@ export interface Video {
 }
 
 export interface Audio {
-    readable: Readable;
+    readable?: Readable;
     options?: {
         onFinish?: () => void;
         bitsPerSample?: number;

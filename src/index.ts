@@ -32,13 +32,17 @@ export class GramTGCalls {
      * Starts streaming the provided medias with their own options.
      */
     async stream(
-        audio: Audio,
+        audio?: Audio,
         video?: Video,
         params?: {
             join?: JoinParams;
             media?: MediaParams;
         },
     ) {
+        if (!audio?.readable && !video?.readable) {
+            throw new Error('Provide a readable at least');
+        }
+
         if (!this.tgcalls) {
             this.tgcalls = new TGCalls({});
             this.tgcalls.joinVoiceCall = async payload => {
@@ -59,12 +63,12 @@ export class GramTGCalls {
         }
 
         if (!this.audioStream && !this.videoStream) {
-            this.audioStream = new Stream(audio.readable, {
-                ...audio.options,
+            this.audioStream = new Stream(audio?.readable, {
+                ...audio?.options,
             });
             this.audioTrack = this.audioStream.createTrack();
 
-            if (audio.options?.onFinish) {
+            if (audio?.options?.onFinish) {
                 this.audioStream.addListener('finish', audio.options.onFinish);
             }
 
@@ -78,7 +82,7 @@ export class GramTGCalls {
                 this.videoStream.addListener('finish', video.options.onFinish);
             }
         } else {
-            this.audioStream?.setReadable(audio.readable);
+            this.audioStream?.setReadable(audio?.readable);
 
             if (video?.readable) {
                 this.videoStream?.setReadable(video.readable);
