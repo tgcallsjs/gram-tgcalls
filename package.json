@@ -1,6 +1,6 @@
 {
     "name": "gram-tgcalls",
-    "version": "2.1.5",
+    "version": "2.1.6",
     "main": "lib/index.js",
     "scripts": {
         "test": "tsc --noEmit",
