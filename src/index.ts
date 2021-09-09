@@ -64,21 +64,29 @@ export class GramTGCalls {
 
         if (!this.audioStream && !this.videoStream) {
             this.audioStream = new Stream(audio?.readable, {
-                audio: { ...audio?.options },
+                audio: { ...audio?.params },
             });
             this.audioTrack = this.audioStream.createTrack();
 
-            if (audio?.options?.onFinish) {
-                this.audioStream.addListener('finish', audio.options.onFinish);
+            if (audio?.listeners?.onError) {
+                this.audioStream.on('error', audio.listeners.onError);
+            }
+
+            if (audio?.listeners?.onFinish) {
+                this.audioStream.on('finish', audio.listeners.onFinish);
             }
 
             this.videoStream = new Stream(video?.readable, {
-                video: { ...video?.options },
+                video: { ...video?.params },
             });
             this.videoTrack = this.videoStream.createTrack();
 
-            if (video?.options?.onFinish) {
-                this.videoStream.addListener('finish', video.options.onFinish);
+            if (video?.listeners?.onError) {
+                this.videoStream.on('error', video.listeners.onError);
+            }
+
+            if (video?.listeners?.onFinish) {
+                this.videoStream.on('finish', video.listeners.onFinish);
             }
         } else {
             this.audioStream?.setReadable(audio?.readable);

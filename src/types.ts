@@ -19,10 +19,15 @@ export interface EditParams {
     presentationPaused?: boolean;
 }
 
+export interface Listeners {
+    onFinish?: () => void;
+    onError?: (error: Error) => void;
+}
+
 export interface Video {
     readable?: Readable;
-    options?: {
-        onFinish?: () => void;
+    listeners: Listeners;
+    params?: {
         width?: number;
         height?: number;
         framerate?: number;
@@ -31,8 +36,8 @@ export interface Video {
 
 export interface Audio {
     readable?: Readable;
-    options?: {
-        onFinish?: () => void;
+    listeners: Listeners;
+    params?: {
         bitsPerSample?: number;
         sampleRate?: number;
         channelCount?: number;
