@@ -4,7 +4,6 @@ An operative library for Telegram calls and a tgcallsjs helper.
 
 ## Features
 
--   Video support.
 -   Super light & easy-to-use.
 -   Smart stream function.
 -   Native controls: pause, resume, mute, unmute.
