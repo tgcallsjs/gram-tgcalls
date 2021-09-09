@@ -64,7 +64,7 @@ export class GramTGCalls {
 
         if (!this.audioStream && !this.videoStream) {
             this.audioStream = new Stream(audio?.readable, {
-                ...audio?.options,
+                audio: { ...audio?.options },
             });
             this.audioTrack = this.audioStream.createTrack();
 
@@ -73,8 +73,7 @@ export class GramTGCalls {
             }
 
             this.videoStream = new Stream(video?.readable, {
-                video: true,
-                ...video?.options,
+                video: { ...video?.options },
             });
             this.videoTrack = this.videoStream.createTrack();
 

@@ -25,6 +25,6 @@
     },
     "dependencies": {
         "telegram": "^1.8.10",
-        "tgcalls": "github:rojserbest/tgcalls"
+        "tgcalls": "^1.0.1"
     }
 }
