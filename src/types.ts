@@ -26,7 +26,7 @@ export interface Listeners {
 
 export interface Video {
     readable?: Readable;
-    listeners: Listeners;
+    listeners?: Listeners;
     params?: {
         width?: number;
         height?: number;
@@ -36,7 +36,7 @@ export interface Video {
 
 export interface Audio {
     readable?: Readable;
-    listeners: Listeners;
+    listeners?: Listeners;
     params?: {
         bitsPerSample?: number;
         sampleRate?: number;
