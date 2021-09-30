@@ -1,5 +1,5 @@
 import { Api, TelegramClient } from 'telegram';
-import { TGCalls, Stream } from 'tgcalls';
+import { TGCalls, Stream } from '../../tgcalls/src/index';
 import * as calls from './calls';
 import * as chats from './chats';
 import { JoinParams, MediaParams, EditParams, Audio, Video } from './types';
@@ -79,6 +79,26 @@ export class GramTGCalls {
             this.videoStream = new Stream(video?.readable, {
                 video: { ...video?.params },
             });
+            this.audioStream.remotePlayingTime = () => {
+                return {
+                    time: this.videoStream!.currentPlayedTime(),
+                };
+            };
+            this.videoStream.remotePlayingTime = () => {
+                return {
+                    time: this.audioStream!.currentPlayedTime(),
+                };
+            };
+            this.audioStream.remoteLagging = () => {
+                return {
+                    isLagging: this.videoStream!.checkLag(),
+                };
+            };
+            this.videoStream.remoteLagging = () => {
+                return {
+                    isLagging: this.audioStream!.checkLag(),
+                };
+            };
             this.videoTrack = this.videoStream.createTrack();
 
             if (video?.listeners?.onError) {
@@ -98,7 +118,7 @@ export class GramTGCalls {
         }
 
         try {
-            await this.tgcalls.start(this.audioTrack, this.videoTrack);
+            await this.tgcalls.start(this.audioTrack!, this.videoTrack!);
         } catch (err) {
             this.reset();
             throw err;
