@@ -1,5 +1,5 @@
 import { Api, TelegramClient } from 'telegram';
-import { TGCalls, Stream } from '../../tgcalls/src/index';
+import { TGCalls, Stream } from 'tgcalls';
 import * as calls from './calls';
 import * as chats from './chats';
 import { JoinParams, MediaParams, EditParams, Audio, Video } from './types';
