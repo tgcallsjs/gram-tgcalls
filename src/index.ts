@@ -79,26 +79,31 @@ export class GramTGCalls {
             this.videoStream = new Stream(video?.readable, {
                 video: { ...video?.params },
             });
-            this.audioStream.remotePlayingTime = () => {
+
+            this.audioStream.remoteTime = () => {
                 return {
-                    time: this.videoStream!.currentPlayedTime(),
+                    time: this.videoStream!.time(),
                 };
             };
-            this.videoStream.remotePlayingTime = () => {
+
+            this.videoStream.remoteTime = () => {
                 return {
-                    time: this.audioStream!.currentPlayedTime(),
+                    time: this.audioStream!.time(),
                 };
             };
+
             this.audioStream.remoteLagging = () => {
                 return {
-                    isLagging: this.videoStream!.checkLag(),
+                    lagging: this.videoStream!.isLagging(),
                 };
             };
+
             this.videoStream.remoteLagging = () => {
                 return {
-                    isLagging: this.audioStream!.checkLag(),
+                    lagging: this.audioStream!.isLagging(),
                 };
             };
+
             this.videoTrack = this.videoStream.createTrack();
 
             if (video?.listeners?.onError) {
