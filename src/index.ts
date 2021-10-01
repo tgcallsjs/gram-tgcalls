@@ -1,3 +1,4 @@
+import { PassThrough } from 'stream';
 import { Api, TelegramClient } from 'telegram';
 import { TGCalls, Stream } from 'tgcalls';
 import * as calls from './calls';
@@ -63,9 +64,12 @@ export class GramTGCalls {
         }
 
         if (!this.audioStream && !this.videoStream) {
-            this.audioStream = new Stream(audio?.readable, {
-                audio: { ...audio?.params },
-            });
+            this.audioStream = new Stream(
+                audio?.readable || new PassThrough(),
+                {
+                    audio: { ...audio?.params },
+                },
+            );
             this.audioTrack = this.audioStream.createTrack();
 
             if (audio?.listeners?.onError) {
@@ -76,9 +80,12 @@ export class GramTGCalls {
                 this.audioStream.on('finish', audio.listeners.onFinish);
             }
 
-            this.videoStream = new Stream(video?.readable, {
-                video: { ...video?.params },
-            });
+            this.videoStream = new Stream(
+                video?.readable || new PassThrough(),
+                {
+                    video: { ...video?.params },
+                },
+            );
 
             this.audioStream.remoteTime = () => {
                 return {
