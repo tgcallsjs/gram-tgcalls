@@ -25,6 +25,6 @@
     },
     "dependencies": {
         "telegram": "^1.8.10",
-        "tgcalls": "^1.0.1"
+        "tgcalls": "github:smaznet/tgcalls#smaznet-patch-2"
     }
 }
