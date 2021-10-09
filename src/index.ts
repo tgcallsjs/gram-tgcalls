@@ -266,7 +266,7 @@ export class GramTGCalls {
     /**
      * Tells if the audio has finished streaming. Returns `null` if not in call, `true` if finished or `false` if not.
      */
-    audioFinished() {
+    get audioFinished() {
         if (!this.audioStream) {
             return null;
         }
@@ -277,7 +277,7 @@ export class GramTGCalls {
     /**
      * Tells if the video has finished streaming. Returns `null` if not in call, `true` if finished or `false` if not.
      */
-    videoFinished() {
+    get videoFinished() {
         if (!this.videoStream) {
             return null;
         }
