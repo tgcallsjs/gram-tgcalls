@@ -250,13 +250,15 @@ export class GramTGCalls {
     }
 
     /**
-     * Stops the stream, closes the WebRTC connection, sends leave request to Telegram and frees up resources. Returns `false` if not in call or `true` if successful.
+     * Stops the streams, closes the WebRTC connection, sends leave request to Telegram and frees up resources. Returns `false` if not in call or `true` if successful.
      */
     async stop() {
         if (!this.call) {
             return false;
         }
 
+        this.audioStream?.stop();
+        this.videoStream?.stop();
         this.close();
         await calls.leave(this.client, this.call);
         this.reset();
