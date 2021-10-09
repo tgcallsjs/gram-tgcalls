@@ -73,7 +73,7 @@ export class GramTGCalls {
             }
 
             if (audio?.listeners?.onFinish) {
-                this.audioStream.on('finish', audio.listeners.onFinish);
+                this.audioStream.once('finish', audio.listeners.onFinish);
             }
 
             this.videoStream = new Stream(video?.readable, {
@@ -86,7 +86,7 @@ export class GramTGCalls {
             }
 
             if (video?.listeners?.onFinish) {
-                this.videoStream.on('finish', video.listeners.onFinish);
+                this.videoStream.once('finish', video.listeners.onFinish);
             }
         } else {
             this.audioStream?.setReadable(audio?.readable);
