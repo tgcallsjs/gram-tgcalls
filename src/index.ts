@@ -286,6 +286,28 @@ export class GramTGCalls {
     }
 
     /**
+     * Tells if the audio stream was stopped. Returns `null` if not in call, `true` if stopped or `false` if not.
+     */
+    get audioStopped() {
+        if (!this.audioStream) {
+            return null;
+        }
+
+        return this.audioStream.stopped;
+    }
+
+    /**
+     * Tells if the video stream was stopped. Returns `null` if not in call, `true` if stopped or `false` if not.
+     */
+    get videoStopped() {
+        if (!this.videoStream) {
+            return null;
+        }
+
+        return this.videoStream.stopped;
+    }
+
+    /**
      * Edits the provided participant.
      */
     async edit(participant: Api.TypeEntityLike, params: EditParams) {
