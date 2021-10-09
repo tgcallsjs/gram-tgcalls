@@ -90,9 +90,15 @@ export class GramTGCalls {
             }
         } else {
             this.audioStream?.setReadable(audio?.readable);
+            if (audio?.listeners?.onFinish) {
+                this.audioStream?.once('finish', audio.listeners.onFinish);
+            }
 
             if (video?.readable) {
                 this.videoStream?.setReadable(video.readable);
+                if (video?.listeners?.onFinish) {
+                    this.videoStream?.once('finish', video.listeners.onFinish);
+                }
             }
             return;
         }
