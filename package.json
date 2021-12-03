@@ -24,7 +24,7 @@
         "typescript": "^4.4.3"
     },
     "dependencies": {
-        "telegram": "^1.9.6",
+        "telegram": "^2.0.8",
         "tgcalls": "^1.0.1"
     }
 }
