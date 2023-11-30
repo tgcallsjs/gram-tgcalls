@@ -18,34 +18,17 @@ npm i gram-tgcalls
 ## Example usage with audio
 
 ```js
-const { TelegramClient } = require("telegram");
-const { StringSession } = require("telegram/sessions");
-const input = require("input");
-const { GramTGCalls } = require("gram-tgcalls");
+const { GramTGCalls, gramjs } = require("gram-tgcalls");
 
+// for apiId and hash go to my.telegram.org
 const apiId = 123456;
 const apiHash = "392ykiyourhashhere";
-const stringSession = new StringSession("");
-const username = "@group_username";
+const stringSession = "";
 
 (async () => {
-  console.log("Loading interactive example...");
-  const client = new TelegramClient(stringSession, apiId, apiHash, {
-    connectionRetries: 5,
-  });
-
-  await client.start({
-    phoneNumber: async () => await input.text("Please enter your number: "),
-    password: async () => await input.text("Please enter your password: "),
-    phoneCode: async () =>
-      await input.text("Please enter the code you received: "),
-    onError: (err) => console.log(err),
-  });
-
-  console.log("You should now be connected.");
-
-  let tg = new GramTGCalls(client, username);
-
+ const client = await gramjs(apiId, apiHash, stringSession);
+  console.log(client.session.save()); // use this value in stringSession
+  let tg = new GramTGCalls(client, "groupusername");
   tg.streamAudio("./audio.mp3");
 })();
 

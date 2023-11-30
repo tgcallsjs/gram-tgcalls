@@ -5,6 +5,7 @@ import * as chats from './chats';
 import { JoinParams, MediaParams, EditParams, Audio, Video, Path } from './types';
 import { Readable } from 'stream';
 import { spawn } from 'child_process';
+export { gramjs } from "./gramjs"
 
 export class GramTGCalls {
     private call?: Api.InputGroupCall;
@@ -132,8 +133,8 @@ export class GramTGCalls {
 
             const audioStream = audioProcess.stdio[1];
             this.stream({ readable: audioStream as any }, undefined, params)
-        } 
-         else if(audio instanceof Readable){
+        }
+        else if (audio instanceof Readable) {
             // FFmpeg command for audio processing
             const audioProcess = spawn('ffmpeg', [
                 '-i', 'pipe:0',
@@ -147,8 +148,8 @@ export class GramTGCalls {
 
             const audioStream = audioProcess.stdio[1];
             this.stream({ readable: audioStream as Readable }, undefined, params)
-        } else if(audio.readable){
-             this.stream(audio as Audio, undefined, params)
+        } else if (audio.readable) {
+            this.stream(audio as Audio, undefined, params)
         }
     }
 
