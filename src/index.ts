@@ -2,7 +2,9 @@ import { Api, TelegramClient } from 'telegram';
 import { TGCalls, Stream } from 'tgcalls';
 import * as calls from './calls';
 import * as chats from './chats';
-import { JoinParams, MediaParams, EditParams, Audio, Video } from './types';
+import { JoinParams, MediaParams, EditParams, Audio, Video, Path } from './types';
+import { Readable } from 'stream';
+import { spawn } from 'child_process';
 
 export class GramTGCalls {
     private call?: Api.InputGroupCall;
@@ -102,6 +104,51 @@ export class GramTGCalls {
         } catch (err) {
             this.reset();
             throw err;
+        }
+    }
+
+    /**
+     * Starts audio streaming
+     */
+    async streamAudio(
+        audio?: Audio | Readable | Path,
+        params: {
+            join?: JoinParams;
+            media?: MediaParams;
+        } = { join: { videoStopped: true }, media: {} },
+    ) {
+        if (!audio) {
+            throw new Error("No audio path or readable stream")
+        }
+        if (typeof audio == "string") {
+            // FFmpeg command for audio processing
+            const audioProcess = spawn('ffmpeg', [
+                '-i', audio,
+                '-f', 's16le',
+                '-ac', '1',
+                '-ar', '65000',
+                'pipe:1',
+            ]);
+
+            const audioStream = audioProcess.stdio[1];
+            this.stream({ readable: audioStream as any }, undefined, params)
+        } 
+         else if(audio instanceof Readable){
+            // FFmpeg command for audio processing
+            const audioProcess = spawn('ffmpeg', [
+                '-i', 'pipe:0',
+                '-f', 's16le',
+                '-ac', '1',
+                '-ar', '65000',
+                'pipe:1',
+            ]);
+
+            audio.pipe(audioProcess.stdin)
+
+            const audioStream = audioProcess.stdio[1];
+            this.stream({ readable: audioStream as Readable }, undefined, params)
+        } else if(audio.readable){
+             this.stream(audio as Audio, undefined, params)
         }
     }
 
@@ -246,7 +293,7 @@ export class GramTGCalls {
             this.videoStream =
             this.audioTrack =
             this.videoTrack =
-                undefined;
+            undefined;
     }
 
     /**

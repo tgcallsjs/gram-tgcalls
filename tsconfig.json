@@ -8,7 +8,7 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "declaration": true
+        "declaration": true,
     },
     "typedocOptions": {
         "excludePrivate": true,
@@ -16,5 +16,8 @@
         "name": "tgcallsjs",
         "out": "docs/",
         "readme": "none"
-    }
+    },
+    "exclude": [
+        "./index.ts"
+      ]
 }

@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { Api } from 'telegram';
-
+export type Path = string
 export interface JoinParams {
     joinAs?: Api.TypeEntityLike;
     muted?: boolean;
